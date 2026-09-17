@@ -1,0 +1,225 @@
+:root {
+  --bg-dark: #090a0f;
+  --card-bg: rgba(18, 20, 32, 0.75);
+  --gemini-blue: #4b90ff;
+  --gemini-purple: #a555f7;
+  --gemini-pink: #f87b92;
+  --text-color: #f1f3f9;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+  width: 100%;
+  min-height: 100vh;
+}
+
+#black-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000000;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 1.2s ease;
+  pointer-events: none;
+}
+
+.scroll-container {
+  height: 400vh;
+}
+
+.viewport {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.gemini-glow {
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(165, 85, 247, 0.22) 0%, rgba(75, 144, 255, 0.1) 45%, rgba(0,0,0,0) 70%);
+  z-index: 1;
+  pointer-events: none;
+  transform: translateZ(0);
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 25px;
+  font-size: 0.85rem;
+  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  z-index: 20;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+/* CONTAINER DE FLORES */
+.bouquet-wrapper {
+  position: relative;
+  width: clamp(230px, 60vw, 380px);
+  height: clamp(230px, 60vw, 380px);
+  z-index: 10;
+  pointer-events: none;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.flower {
+  position: absolute;
+  will-change: transform;
+  transform-origin: center center;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.stems {
+  position: absolute;
+  bottom: -8.3%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 29.2%;
+  height: 45.8%;
+  z-index: 2;
+  will-change: opacity;
+  transition: opacity 0.8s ease;
+}
+
+.flower-center { top: 6%; left: 16%; width: 68%; height: 68%; z-index: 8; }
+.flower-left { top: 22%; left: -2%; width: 54%; height: 54%; z-index: 7; }
+.flower-right { top: 20%; right: -2%; width: 56%; height: 56%; z-index: 6; }
+.flower-bottom { top: 48%; left: 32%; width: 36%; height: 36%; z-index: 9; }
+
+/* REFINAMENTO E CONTRASTE DO CORAÇÃO */
+.bouquet-wrapper.formed-heart {
+  clip-path: path("M 150,45 C 100,-20 0,30 0,110 C 0,180 150,280 150,280 C 150,280 300,180 300,110 C 300,30 200,-20 150,45 Z");
+  filter: drop-shadow(0 0 15px rgba(248, 123, 146, 0.6)) drop-shadow(0 0 35px rgba(165, 85, 247, 0.4));
+  animation: heartPulse 1.6s infinite ease-in-out alternate;
+}
+
+@keyframes heartPulse {
+  0% { transform: scale(1.02) translate3d(0, -30px, 0); }
+  100% { transform: scale(1.15) translate3d(0, -30px, 0); }
+}
+
+/* TEXTO FINAL ABAIXO DO CORAÇÃO */
+.final-message {
+  position: absolute;
+  bottom: 12%;
+  width: min(85vw, 360px);
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s ease 0.8s, transform 1s ease 0.8s;
+  z-index: 12;
+}
+
+.final-message.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.final-message p {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* CARDS */
+.card-container {
+  position: absolute;
+  z-index: 15;
+  width: min(90vw, 440px);
+  text-align: center;
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 28px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  opacity: 0;
+  transform: scale(0.9) translate3d(0,0,0);
+  will-change: transform, opacity;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.card-sparkle {
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, var(--gemini-blue), var(--gemini-purple), var(--gemini-pink));
+  clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
+}
+
+.card-container h2 { font-size: 1.15rem; color: rgba(255, 255, 255, 0.9); margin-bottom: 10px; }
+.card-container p { color: rgba(255, 255, 255, 0.75); font-size: 0.95rem; line-height: 1.5; }
+
+#proposalCard h1 {
+  font-size: 1.8rem;
+  background: linear-gradient(135deg, #64b5f6, #ba68c8, #f48fb1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+
+/* GRUPO DE BOTÕES EMPILHADOS */
+.button-group {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-primary {
+  width: 100%;
+  max-width: 240px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--gemini-blue), var(--gemini-purple));
+  color: white;
+  box-shadow: 0 6px 18px rgba(75, 144, 255, 0.35);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.btn-secondary:active {
+  color: rgba(255, 255, 255, 0.8);
+}
