@@ -1,225 +1,506 @@
 :root {
-  --bg-dark: #090a0f;
-  --card-bg: rgba(18, 20, 32, 0.75);
-  --gemini-blue: #4b90ff;
-  --gemini-purple: #a555f7;
-  --gemini-pink: #f87b92;
-  --text-color: #f1f3f9;
-}
+      --bg-dark: #090a0f;
+      --card-bg: rgba(18, 20, 32, 0.75);
+      --gemini-blue: #4b90ff;
+      --gemini-purple: #a555f7;
+      --gemini-pink: #f87b92;
+      --text-color: #f1f3f9;
+      --accent-glow: rgba(165, 85, 247, 0.25);
+      --sad-gray: #6b7280;
+    }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-body {
-  background-color: var(--bg-dark);
-  color: var(--text-color);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  overflow-x: hidden;
-  width: 100%;
-  min-height: 100vh;
-}
+    html {
+      /* Mantém a rolagem 1:1 com a animação controlada via JS */
+      -webkit-text-size-adjust: 100%;
+    }
 
-#black-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: #000000;
-  z-index: 9999;
-  opacity: 1;
-  transition: opacity 1.2s ease;
-  pointer-events: none;
-}
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-color);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      width: 100%;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
 
-.scroll-container {
-  height: 400vh;
-}
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
 
-.viewport {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  padding: 16px;
-  overflow: hidden;
-}
+    /* --------------------------------------------------
+       OVERLAY INICIAL (Tela Preta Suave)
+       -------------------------------------------------- */
+    #black-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh; /* altura real em navegadores móveis com barra dinâmica */
+      background-color: #000000;
+      z-index: 9999;
+      opacity: 1;
+      transition: opacity 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
 
-.gemini-glow {
-  position: absolute;
-  width: 450px;
-  height: 450px;
-  background: radial-gradient(circle, rgba(165, 85, 247, 0.22) 0%, rgba(75, 144, 255, 0.1) 45%, rgba(0,0,0,0) 70%);
-  z-index: 1;
-  pointer-events: none;
-  transform: translateZ(0);
-}
+    /* --------------------------------------------------
+       CONTAINER DE ROLAGEM
+       -------------------------------------------------- */
+    .scroll-container {
+      height: 400vh; /* Permite etapas graduais durante a rolagem */
+      height: 400dvh;
+    }
 
-.scroll-hint {
-  position: absolute;
-  bottom: 25px;
-  font-size: 0.85rem;
-  letter-spacing: 3px;
-  color: rgba(255, 255, 255, 0.6);
-  text-transform: uppercase;
-  z-index: 20;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
-}
+    .viewport {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 16px;
+      overflow: hidden;
+    }
 
-/* CONTAINER DE FLORES */
-.bouquet-wrapper {
-  position: relative;
-  width: clamp(230px, 60vw, 380px);
-  height: clamp(230px, 60vw, 380px);
-  z-index: 10;
-  pointer-events: none;
-  will-change: transform;
-  transform: translate3d(0, 0, 0);
-  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
+    /* Glow de Fundo Estilo Gemini */
+    .gemini-glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(165, 85, 247, 0.2) 0%, rgba(75, 144, 255, 0.12) 40%, rgba(0,0,0,0) 70%);
+      filter: blur(60px);
+      z-index: 1;
+      pointer-events: none;
+      animation: ambientPulse 8s infinite alternate ease-in-out;
+    }
 
-.flower {
-  position: absolute;
-  will-change: transform;
-  transform-origin: center center;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
+    @keyframes ambientPulse {
+      0% { transform: scale(0.9) rotate(0deg); opacity: 0.7; }
+      100% { transform: scale(1.15) rotate(15deg); opacity: 1; }
+    }
 
-.stems {
-  position: absolute;
-  bottom: -8.3%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 29.2%;
-  height: 45.8%;
-  z-index: 2;
-  will-change: opacity;
-  transition: opacity 0.8s ease;
-}
+    /* Visual Hint para Rolar */
+    .scroll-hint {
+      position: absolute;
+      bottom: 25px;
+      font-size: 0.85rem;
+      letter-spacing: 3px;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      animation: bounce 2s infinite;
+      z-index: 20;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
 
-.flower-center { top: 6%; left: 16%; width: 68%; height: 68%; z-index: 8; }
-.flower-left { top: 22%; left: -2%; width: 54%; height: 54%; z-index: 7; }
-.flower-right { top: 20%; right: -2%; width: 56%; height: 56%; z-index: 6; }
-.flower-bottom { top: 48%; left: 32%; width: 36%; height: 36%; z-index: 9; }
+    .scroll-hint::after {
+      content: '↓';
+      font-size: 1.2rem;
+      color: var(--gemini-purple);
+    }
 
-/* REFINAMENTO E CONTRASTE DO CORAÇÃO */
-.bouquet-wrapper.formed-heart {
-  clip-path: path("M 150,45 C 100,-20 0,30 0,110 C 0,180 150,280 150,280 C 150,280 300,180 300,110 C 300,30 200,-20 150,45 Z");
-  filter: drop-shadow(0 0 15px rgba(248, 123, 146, 0.6)) drop-shadow(0 0 35px rgba(165, 85, 247, 0.4));
-  animation: heartPulse 1.6s infinite ease-in-out alternate;
-}
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); opacity: 0.4; }
+      50% { transform: translateY(-8px); opacity: 0.9; }
+    }
 
-@keyframes heartPulse {
-  0% { transform: scale(1.02) translate3d(0, -30px, 0); }
-  100% { transform: scale(1.15) translate3d(0, -30px, 0); }
-}
+    /* --------------------------------------------------
+       BUQUÊ DE FLORES REALISTAS
+       -------------------------------------------------- */
+    .bouquet-wrapper {
+      position: relative;
+      width: clamp(220px, 62vw, 480px);
+      height: clamp(220px, 62vw, 480px);
+      max-height: 46vh;
+      z-index: 10;
+      pointer-events: none;
+      margin: 0 auto;
+    }
 
-/* TEXTO FINAL ABAIXO DO CORAÇÃO */
-.final-message {
-  position: absolute;
-  bottom: 12%;
-  width: min(85vw, 360px);
-  text-align: center;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 1s ease 0.8s, transform 1s ease 0.8s;
-  z-index: 12;
-}
+    .flower {
+      position: absolute;
+      transition: transform 0.1s linear, opacity 0.2s ease;
+      transform-origin: center center;
+      filter: drop-shadow(0px 15px 25px rgba(0, 0, 0, 0.6));
+    }
 
-.final-message.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+    /* Caules e Fitas do Buquê */
+    .stems {
+      position: absolute;
+      bottom: -8.3%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 29.2%;
+      height: 45.8%;
+      z-index: 2;
+      transition: opacity 0.4s ease, transform 0.1s linear;
+    }
 
-.final-message p {
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
-}
+    /* Posições Iniciais Harmoniosas do Buquê (em % para escalar com o buquê fluido) */
+    .flower-lily-center {
+      top: 4.2%;
+      left: 22.9%;
+      width: 54.2%;
+      height: 54.2%;
+      z-index: 8;
+    }
 
-/* CARDS */
-.card-container {
-  position: absolute;
-  z-index: 15;
-  width: min(90vw, 440px);
-  text-align: center;
-  background: var(--card-bg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  padding: 28px;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  opacity: 0;
-  transform: scale(0.9) translate3d(0,0,0);
-  will-change: transform, opacity;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
+    .flower-gerbera-left {
+      top: 27.1%;
+      left: 2.1%;
+      width: 45.8%;
+      height: 45.8%;
+      z-index: 7;
+    }
 
-.card-sparkle {
-  display: inline-block;
-  width: 26px;
-  height: 26px;
-  margin-bottom: 14px;
-  background: linear-gradient(135deg, var(--gemini-blue), var(--gemini-purple), var(--gemini-pink));
-  clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
-}
+    .flower-lily-right {
+      top: 25%;
+      right: 2.1%;
+      width: 47.9%;
+      height: 47.9%;
+      z-index: 6;
+    }
 
-.card-container h2 { font-size: 1.15rem; color: rgba(255, 255, 255, 0.9); margin-bottom: 10px; }
-.card-container p { color: rgba(255, 255, 255, 0.75); font-size: 0.95rem; line-height: 1.5; }
+    .flower-gerbera-bottom {
+      top: 43.8%;
+      left: 29.2%;
+      width: 41.7%;
+      height: 41.7%;
+      z-index: 9;
+    }
 
-#proposalCard h1 {
-  font-size: 1.8rem;
-  background: linear-gradient(135deg, #64b5f6, #ba68c8, #f48fb1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 8px;
-}
+    /* --------------------------------------------------
+       CARDS DE TEXTO (Mensagem Intermediária & Pedido)
+       -------------------------------------------------- */
+    .card-container {
+      position: absolute;
+      z-index: 15;
+      width: min(92vw, 460px);
+      max-height: 88vh;
+      overflow-y: auto;
+      text-align: center;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: clamp(22px, 5vw, 40px) clamp(18px, 4.5vw, 32px);
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      pointer-events: auto;
+      opacity: 0;
+      transform: scale(0.85);
+      transition: opacity 0.3s ease, transform 0.1s linear;
+    }
 
-/* GRUPO DE BOTÕES EMPILHADOS */
-.button-group {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
+    /* Fallback para navegadores sem suporte a backdrop-filter */
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .card-container {
+        background: rgba(14, 15, 24, 0.94);
+      }
+    }
 
-.btn-primary {
-  width: 100%;
-  max-width: 240px;
-  padding: 12px 24px;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 50px;
-  border: none;
-  cursor: pointer;
-  background: linear-gradient(135deg, var(--gemini-blue), var(--gemini-purple));
-  color: white;
-  box-shadow: 0 6px 18px rgba(75, 144, 255, 0.35);
-}
+    .card-sparkle {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--gemini-blue), var(--gemini-purple), var(--gemini-pink));
+      clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
+      animation: rotateSparkle 6s linear infinite;
+    }
 
-.btn-secondary {
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 0.8rem;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
+    @keyframes rotateSparkle {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.15); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
 
-.btn-secondary:active {
-  color: rgba(255, 255, 255, 0.8);
-}
+    .card-container h2 {
+      font-size: clamp(1.05rem, 4vw, 1.4rem);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .card-container p {
+      color: rgba(255, 255, 255, 0.75);
+      font-size: clamp(0.88rem, 3.2vw, 1rem);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    /* Estilo Especial para o Pedido Final */
+    #proposalCard h1 {
+      font-size: clamp(1.6rem, 7vw, 2.2rem);
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #64b5f6, #ba68c8, #f48fb1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #proposalCard h2 {
+      font-size: clamp(1.2rem, 5.5vw, 1.8rem);
+      font-weight: 600;
+      color: #ffffff;
+      margin-top: 10px;
+    }
+
+    /* Botões para o Pedido */
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: clamp(10px, 3vw, 18px);
+      justify-content: center;
+      margin-top: 28px;
+    }
+
+    .btn {
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease,
+        padding 0.45s cubic-bezier(0.22, 0.9, 0.3, 1), font-size 0.45s cubic-bezier(0.22, 0.9, 0.3, 1);
+    }
+
+    .btn-primary {
+      padding: clamp(11px, 2.6vw, 12px) clamp(22px, 6vw, 28px);
+      font-size: clamp(0.92rem, 3.4vw, 1rem);
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--gemini-blue), var(--gemini-purple));
+      color: white;
+      box-shadow: 0 8px 20px rgba(75, 144, 255, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 12px 25px rgba(165, 85, 247, 0.5);
+    }
+
+    /* Quando o botão de recusar desaparece, o de aceitar cresce e fica sozinho, centralizado */
+    .btn-primary.btn-solo {
+      padding: clamp(16px, 4.5vw, 20px) clamp(38px, 10vw, 52px);
+      font-size: clamp(1.1rem, 4.8vw, 1.35rem);
+    }
+
+    /* Botão de Rejeitar: pequeno, discreto e com "ar" triste */
+    .btn-secondary {
+      padding: 7px 16px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--sad-gray);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      opacity: 0.65;
+      box-shadow: none;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+
+    .btn-secondary:hover,
+    .btn-secondary:focus-visible {
+      opacity: 0.85;
+      color: #9aa3af;
+      transform: translateY(1px) scale(0.97) rotate(-1deg);
+      box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-secondary:active {
+      transform: translateY(2px) scale(0.94) rotate(-2deg);
+      opacity: 0.5;
+    }
+
+    /* Estado "Opção errada": pisca em tom avermelhado e treme suavemente */
+    .btn-secondary.wrong-answer {
+      color: #ff9a9a;
+      border-color: rgba(255, 138, 138, 0.35);
+      background: rgba(255, 90, 90, 0.08);
+      opacity: 1;
+      cursor: default;
+      animation: wrongShake 0.45s ease;
+    }
+
+    @keyframes wrongShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+      75% { transform: translateX(-2px); }
+    }
+
+    /* O botão de recusar se dissolve antes de sair do layout */
+    .btn-secondary.fade-out {
+      opacity: 0 !important;
+      transform: scale(0.75) !important;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn-secondary.wrong-answer { animation: none; }
+    }
+
+    /* --------------------------------------------------
+       RESPONSIVIDADE
+       -------------------------------------------------- */
+
+    /* Tablets e telas médias */
+    @media (max-width: 900px) {
+      .gemini-glow {
+        width: 70vmax;
+        height: 70vmax;
+      }
+    }
+
+    /* Celulares em geral */
+    @media (max-width: 600px) {
+      .card-container {
+        border-radius: 22px;
+      }
+      .button-group {
+        margin-top: 20px;
+      }
+    }
+
+    /* Telas bem pequenas (celulares compactos) */
+    @media (max-width: 360px) {
+      .card-sparkle {
+        width: 22px;
+        height: 22px;
+        margin-bottom: 12px;
+      }
+      .scroll-hint {
+        font-size: 0.72rem;
+        letter-spacing: 2px;
+      }
+    }
+
+    /* Orientação paisagem em telas curtas (celular deitado) */
+    @media (max-height: 480px) and (orientation: landscape) {
+      .bouquet-wrapper {
+        width: clamp(160px, 34vh, 300px);
+        height: clamp(160px, 34vh, 300px);
+        max-height: 55vh;
+      }
+      .card-container {
+        padding: 14px 20px;
+        max-height: 92vh;
+      }
+      .card-container h2 { margin-bottom: 8px; }
+      .button-group { margin-top: 14px; }
+      .scroll-hint { bottom: 8px; }
+    }
+
+    /* Telas grandes: evita que tudo fique minúsculo no meio de um monitor enorme */
+    @media (min-width: 1600px) {
+      .bouquet-wrapper {
+        width: 520px;
+        height: 520px;
+      }
+    }
+
+    /* --------------------------------------------------
+       CELEBRAÇÃO: FLORES SE REÚNEM E FORMAM UM CORAÇÃO
+       -------------------------------------------------- */
+
+    .flower,
+    .stems,
+    .card-container {
+      will-change: transform, opacity;
+    }
+
+    .heart-formation {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.7s ease;
+      z-index: 12;
+    }
+
+    .heart-formation.show {
+      opacity: 1;
+    }
+
+    .heart-formation svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    #heartPath {
+      filter: drop-shadow(0 0 6px rgba(165, 85, 247, 0.55)) drop-shadow(0 0 14px rgba(75, 144, 255, 0.35));
+      transition: stroke-dashoffset 1.5s cubic-bezier(0.22, 0.9, 0.3, 1);
+    }
+
+    /* Depois que o contorno termina de se desenhar, buquê + coração pulsam juntos suavemente */
+    @keyframes bouquetBeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.045); }
+    }
+
+    .bouquet-wrapper.beating {
+      animation: bouquetBeat 1.3s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    /* Texto final, centralizado embaixo, exibido após o coração se formar */
+    .celebration-caption {
+      position: absolute;
+      left: 50%;
+      bottom: clamp(28px, 9vh, 72px);
+      transform: translateX(-50%) translateY(12px);
+      width: min(90vw, 420px);
+      text-align: center;
+      font-size: clamp(1.05rem, 4.5vw, 1.5rem);
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.65);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      z-index: 16;
+    }
+
+    .celebration-caption.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #heartPath { transition: stroke-dashoffset 0.4s ease; }
+      .bouquet-wrapper.beating { animation: none; }
+    }
+
+    /* Telas curtas em paisagem: coração um pouco menor para não cortar */
+    @media (max-height: 480px) and (orientation: landscape) {
+      .celebration-caption {
+        font-size: clamp(0.9rem, 3.4vw, 1.15rem);
+        bottom: clamp(10px, 5vh, 24px);
+      }
+    }
